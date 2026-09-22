@@ -11,6 +11,11 @@ export function fmtMass(grams: number): string {
   return Math.abs(grams) >= 1000 ? `${fmt(grams / 1000, 2)} kg` : `${fmt(grams, grams < 10 ? 1 : 0)} g`;
 }
 
+/** 0.4 → "40%", 0.125 → "12.5%". */
+export function fmtPercent(fraction: number): string {
+  return `${(fraction * 100).toLocaleString("en-GB", { maximumFractionDigits: 1 })}%`;
+}
+
 /** 93 → "93 mL", 1250 → "1.25 L". */
 export function fmtVolume(ml: number): string {
   return ml >= 1000 ? `${fmt(ml / 1000, 2)} L` : `${fmt(ml)} mL`;
@@ -108,6 +113,18 @@ export function Field({
       </span>
       {hint && <span className="field-hint">{hint}</span>}
     </label>
+  );
+}
+
+/** A print button with a line of explanation beside it. */
+export function PrintRow({ label, onPrint, children }: { label: string; onPrint: () => void; children: ReactNode }) {
+  return (
+    <div className="print-row">
+      <button type="button" className="btn-primary" onClick={onPrint}>
+        {label}
+      </button>
+      <span className="muted small">{children}</span>
+    </div>
   );
 }
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Segmented } from "./ui";
 
 export type Mode = "simple" | "recipe";
@@ -10,9 +11,12 @@ const MODES: { value: Mode; label: string }[] = [
 export function Masthead({
   mode,
   onModeChange,
+  children,
 }: {
   mode: Mode;
   onModeChange: (mode: Mode) => void;
+  /** Extra controls on the mode switch's row, e.g. "Clear all". */
+  children?: ReactNode;
 }) {
   return (
     <header className="masthead">
@@ -22,13 +26,16 @@ export function Masthead({
         Weigh a known volume of glaze and find out how much dry material is in
         it, and how much water or powder brings it to your target.
       </p>
-      <Segmented
-        value={mode}
-        options={MODES}
-        onChange={onModeChange}
-        label="Calculation mode"
-        className="mode-switch"
-      />
+      <div className="masthead-controls">
+        <Segmented
+          value={mode}
+          options={MODES}
+          onChange={onModeChange}
+          label="Calculation mode"
+          className="mode-switch"
+        />
+        {children}
+      </div>
     </header>
   );
 }

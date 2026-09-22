@@ -1,12 +1,8 @@
 import type { PlannedResult } from "../lib/calculate";
+import { GLAZY_SUPPORT_URL, type GlazySource } from "../lib/glazy";
 import type { RecipeAnalysis } from "../lib/recipe";
 import type { Mode } from "./Masthead";
-import { fmt, fmtMass, pourOffWarning } from "./ui";
-
-/** 0.4 → "40%", 0.125 → "12.5%". */
-function fmtPercent(fraction: number): string {
-  return `${(fraction * 100).toLocaleString("en-GB", { maximumFractionDigits: 1 })}%`;
-}
+import { fmt, fmtMass, fmtPercent, pourOffWarning } from "./ui";
 
 /**
  * The one-page plan for the studio wall. Hidden on screen, it is the only
@@ -18,12 +14,15 @@ export function PrintPlan({
   result,
   mode,
   recipe,
+  source,
 }: {
   name: string;
   result: PlannedResult;
   mode: Mode;
   /** Recipe mode only. */
   recipe: RecipeAnalysis | null;
+  /** Where the recipe came from, if it was imported. */
+  source: GlazySource | null;
 }) {
   const { slurry: current, powder, content, adjustment } = result;
   const { plan, slurryGrams, target } = adjustment;
@@ -67,6 +66,18 @@ export function PrintPlan({
               <th>Recipe</th>
               <td colSpan={3} className="pp-recipe">
                 {parts.map((p) => `${p.name} ${fmtPercent(p.fraction)}`).join(" · ")}
+                {source && (
+                  <>
+                    <span className="pp-source">
+                      From Glazy: {source.name}
+                      {source.author && ` by ${source.author}`} ({source.url.replace("https://", "")}), CC BY-NC-SA 4.0
+                    </span>
+                    <span className="pp-source">
+                      Glazy is a free, open recipe library kept running by its community. Support it at{" "}
+                      {GLAZY_SUPPORT_URL.replace("https://", "")}
+                    </span>
+                  </>
+                )}
               </td>
             </tr>
           )}

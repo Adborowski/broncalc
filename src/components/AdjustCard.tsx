@@ -1,19 +1,21 @@
 import type { Calculation } from "../lib/calculate";
 import type { Plan } from "../lib/plan";
 import type { Part, RecipeAnalysis } from "../lib/recipe";
-import { Card, Field, Note, fmt, fmtMass, fmtVolume, isBadNumber, pourOffWarning } from "./ui";
+import { Card, Field, Note, PrintRow, fmt, fmtMass, fmtVolume, isBadNumber, pourOffWarning } from "./ui";
 
 export function AdjustCard({
   target,
   onTargetChange,
   calc,
   recipe,
+  onPrint,
 }: {
   target: string;
   onTargetChange: (v: string) => void;
   calc: Calculation;
   /** Recipe mode only: for the powder breakdown and soluble warnings. */
   recipe: RecipeAnalysis | null;
+  onPrint: () => void;
 }) {
   const adjustment = calc.status === "ok" ? calc.adjustment : null;
   return (
@@ -32,7 +34,9 @@ export function AdjustCard({
       {adjustment?.status === "ok" && (
         <>
           <Advice plan={adjustment.plan} recipe={recipe} />
-          <PrintButton />
+          <PrintRow label="Print plan" onPrint={onPrint}>
+            A one-page version for the studio. Choose "Save as PDF" in the print dialog to keep a file.
+          </PrintRow>
         </>
       )}
     </Card>
@@ -113,18 +117,5 @@ function Breakdown({ parts, grams }: { parts: Part[]; grams: number }) {
         ))}
       </tbody>
     </table>
-  );
-}
-
-function PrintButton() {
-  return (
-    <div className="print-row">
-      <button type="button" className="btn-primary" onClick={() => window.print()}>
-        Print plan
-      </button>
-      <span className="muted small">
-        A one-page version for the studio. Choose "Save as PDF" in the print dialog to keep a file.
-      </span>
-    </div>
   );
 }

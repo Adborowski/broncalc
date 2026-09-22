@@ -6,6 +6,8 @@ export interface RecipeRow {
   materialId: string;
   /** As typed; parsed here. */
   amount: string;
+  /** The ingredient's name where it came from (e.g. Glazy), shown while no material is chosen. */
+  sourceName?: string;
 }
 
 export interface Part {

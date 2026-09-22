@@ -1,5 +1,7 @@
 import { TYPICAL_POWDER } from "../lib/calculate";
+import type { GlazySource } from "../lib/glazy";
 import type { RecipeAnalysis, RecipeRow } from "../lib/recipe";
+import { GlazyCredit } from "./GlazyImport";
 import type { Mode } from "./Masthead";
 import { RecipeEditor } from "./RecipeEditor";
 import { Card, Note, fmt, listJoin } from "./ui";
@@ -10,19 +12,24 @@ export function PowderCard({
   onRowsChange,
   recipe,
   onUseRecipe,
+  source,
 }: {
   mode: Mode;
   rows: RecipeRow[];
   onRowsChange: (rows: RecipeRow[]) => void;
   recipe: RecipeAnalysis;
   onUseRecipe: () => void;
+  /** Where the current recipe came from, if it was imported. */
+  source: GlazySource | null;
 }) {
   return mode === "simple" ? (
     <AssumedPowder onUseRecipe={onUseRecipe} />
   ) : (
     <Card step="2" title="Dry powder SG">
+      {source && <GlazyCredit source={source} />}
       <RecipeEditor rows={rows} onChange={onRowsChange} />
       <MixSummary recipe={recipe} />
+      <UnmatchedWarning rows={rows} />
       <RecipeWarnings recipe={recipe} />
     </Card>
   );
@@ -45,7 +52,7 @@ function AssumedPowder({ onUseRecipe }: { onUseRecipe: () => void }) {
       <Note>
         Glazes with a lot of zircon, tin, zinc or barium are heavier than this.{" "}
         <button type="button" className="btn-link inline" onClick={onUseRecipe}>
-          Use From recipe
+          Switch to Advanced
         </button>{" "}
         to calculate the powder SG from your ingredients.
       </Note>
@@ -68,6 +75,18 @@ function MixSummary({ recipe: { mix } }: { recipe: RecipeAnalysis }) {
   );
 }
 
+/** Imported ingredients still waiting for the user to pick a material. */
+function UnmatchedWarning({ rows }: { rows: RecipeRow[] }) {
+  const unmatched = rows.filter((r) => !r.materialId && r.sourceName).map((r) => r.sourceName!);
+  if (unmatched.length === 0) return null;
+  return (
+    <Note tone="warn">
+      Not in our library yet: {listJoin(unmatched)}. Pick the closest match in the recipe above, or remove the row.
+      Unmatched rows don't count towards the mix SG.
+    </Note>
+  );
+}
+
 const names = (materials: { name: string }[]) => listJoin(materials.map((m) => m.name));
 
 function RecipeWarnings({ recipe }: { recipe: RecipeAnalysis }) {
@@ -87,12 +106,7 @@ function RecipeWarnings({ recipe }: { recipe: RecipeAnalysis }) {
           the slurry ages.
         </Note>
       )}
-      {estimated.length > 0 && (
-        <Note>
-          Estimated SG (no published figure): {names(estimated)}. Measured values for your own materials would improve
-          it.
-        </Note>
-      )}
+      {estimated.length > 0 && <Note>Estimated SG (no published figure): {names(estimated)}.</Note>}
     </>
   );
 }

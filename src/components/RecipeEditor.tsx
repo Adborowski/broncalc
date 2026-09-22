@@ -5,6 +5,17 @@ import { parseNumber } from "../lib/brongniart";
 import { MaterialPicker } from "./MaterialPicker";
 import { fmt } from "./ui";
 
+/** The Glazy name a row was matched from, when it differs from ours (e.g. "EPK" for Kaolin). */
+function matchedFrom(row: RecipeRow, ourName: string | undefined): string | undefined {
+  if (!row.sourceName || !ourName) return undefined;
+  return ourName.toLowerCase().includes(row.sourceName.toLowerCase()) ? undefined : `Glazy: ${row.sourceName}`;
+}
+
+function rowClass(row: RecipeRow, use: string | undefined): string | undefined {
+  if (!row.materialId && row.sourceName) return "row-unmatched";
+  return use === "invalid" ? "row-excluded" : undefined;
+}
+
 export function RecipeEditor({ rows, onChange }: { rows: RecipeRow[]; onChange: (rows: RecipeRow[]) => void }) {
   const [focusId, setFocusId] = useState<string | null>(null);
   const total = rows.reduce((sum, r) => {
@@ -22,10 +33,10 @@ export function RecipeEditor({ rows, onChange }: { rows: RecipeRow[]; onChange: 
           <thead>
             <tr>
               <th>Material</th>
-              <th className="num">Amount</th>
-              <th className="num">%</th>
-              <th className="num">SG</th>
-              <th aria-label="Remove" />
+              <th className="num col-amount">Amount</th>
+              <th className="num col-pct">%</th>
+              <th className="num col-sg">SG</th>
+              <th className="col-remove" aria-label="Remove" />
             </tr>
           </thead>
           <tbody>
@@ -33,12 +44,14 @@ export function RecipeEditor({ rows, onChange }: { rows: RecipeRow[]; onChange: 
               const m = MATERIAL_BY_ID.get(row.materialId);
               const n = parseNumber(row.amount);
               return (
-                <tr key={row.id} className={m?.use === "invalid" ? "row-excluded" : undefined}>
+                <tr key={row.id} className={rowClass(row, m?.use)}>
                   <td>
                     <MaterialPicker
                       value={row.materialId}
                       onChange={(materialId) => update(row.id, { materialId })}
                       autoFocus={row.id === focusId}
+                      hint={row.sourceName}
+                      note={matchedFrom(row, m?.name)}
                     />
                   </td>
                   <td className="num">

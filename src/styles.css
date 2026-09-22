@@ -102,15 +102,23 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
 
 /* Recipe */
 .recipe-scroll { margin: 0 -4px; }
-.recipe-table { width: 100%; border-collapse: collapse; }
+/* Fixed layout: the material column takes what's left, so a long name or
+   Glazy tag can never push the other columns out of the card. */
+.recipe-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.recipe-table .col-amount { width: 88px; }
+.recipe-table .col-pct { width: 50px; }
+.recipe-table .col-sg { width: 50px; }
+.recipe-table .col-remove { width: 34px; }
 .recipe-table th { font-size: 12px; font-weight: 600; color: var(--ink-2); text-align: left; padding: 0 4px 6px; }
 .recipe-table td { padding: 3px 4px; vertical-align: middle; }
-.recipe-table .picker input, .recipe-table .amount {
-  width: 100%; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: inherit; font: 14px var(--sans); padding: 7px 8px;
+.recipe-table .picker-box, .recipe-table .amount {
+  width: 100%; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: inherit; font: 14px var(--sans);
 }
-.recipe-table td:first-child { width: 100%; }
-.recipe-table .picker { min-width: 190px; }
-.recipe-table .amount { width: 76px; text-align: right; font-variant-numeric: tabular-nums; }
+.recipe-table .amount { padding: 7px 8px; }
+.recipe-table .picker-box { display: flex; align-items: center; }
+.recipe-table .picker input { flex: 1; min-width: 0; border: 0; background: none; color: inherit; font: inherit; padding: 7px 8px; outline: none; text-overflow: ellipsis; }
+.picker-note { flex: 0 1 auto; max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; color: var(--ink-2); background: var(--surface-2); border-radius: 4px; padding: 2px 6px; margin-right: 6px; }
+.recipe-table .amount { text-align: right; font-variant-numeric: tabular-nums; }
 .row-excluded .picker input { text-decoration: line-through; color: var(--ink-2); }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .icon-btn { border: 0; background: none; color: var(--ink-2); font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
@@ -127,6 +135,9 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
 .conf-low { background: var(--bad-soft); color: var(--bad); }
 
 /* Results */
+.heroes-caption { margin: 0 0 8px; font-weight: 600; }
+.hero-suffix { font-size: 0.5em; font-weight: 600; }
+.stat-wide { grid-column: 1 / -1; }
 .heroes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .hero { display: grid; gap: 2px; padding: 14px 16px; border-radius: 10px; }
 .hero-powder { background: var(--accent-soft); color: var(--accent); }
@@ -161,6 +172,10 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
 .foot { margin-top: 24px; color: var(--ink-2); font-size: 12.5px; }
 .foot code { font-size: 12px; overflow-wrap: anywhere; }
 
+@media (max-width: 680px) {
+  .picker-note { max-width: 30%; }
+}
+
 @media (max-width: 520px) {
   .page { padding: 20px 16px 36px; }
   h1 { font-size: 36px; }
@@ -168,9 +183,13 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
   .card-head { align-items: flex-start; }
   .hero-num { font-size: 38px; }
   .notes { min-width: 200px; }
-  .recipe-table .picker { min-width: 110px; }
   .recipe-table .picker input { font-size: 13px; padding: 6px; }
-  .recipe-table .amount { width: 56px; padding: 6px; }
+  .picker-note { max-width: 28%; font-size: 10.5px; padding: 1px 4px; }
+  .recipe-table .amount { width: 100%; padding: 6px; }
+  .recipe-table .col-amount { width: 60px; }
+  .recipe-table .col-pct { width: 40px; }
+  .recipe-table .col-sg { width: 40px; }
+  .recipe-table .col-remove { width: 26px; }
   .recipe-table .badge { display: none; }
   .recipe-table .icon-btn { padding: 2px 3px; }
   .recipe-table td, .recipe-table th { padding-left: 2px; padding-right: 2px; }
@@ -178,8 +197,7 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
 
 /* Material picker */
 .picker { position: relative; }
-.picker input { width: 100%; }
-.picker input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.picker-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .picker-list {
   position: absolute; z-index: 20; left: 0; top: calc(100% + 4px); width: max(100%, 320px); max-width: calc(100vw - 40px);
   max-height: 300px; overflow-y: auto; margin: 0; padding: 4px; list-style: none;
@@ -194,7 +212,7 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
 .picker-empty { padding: 8px 10px; color: var(--ink-2); font-size: 13px; }
 
 /* Mode switch & simplified powder card */
-.mode-switch { margin-top: 18px; }
+.masthead-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; margin-top: 18px; }
 .mode-switch button { font-size: 14px; padding: 7px 16px; }
 .assumed-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-2); background: var(--surface-2); padding: 3px 8px; border-radius: 5px; }
 .assumed { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; }
@@ -213,11 +231,7 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
 .advice-main { margin: 0; font-size: 17px; }
 .reading { color: var(--accent); white-space: nowrap; }
 .option h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
-.per-litre { margin: 14px 0 0; font-size: 12.5px; color: var(--ink-2); }
 .field-row.first { margin-top: 0; }
-.batch { margin: 14px 0 0; font-size: 14px; }
-.batch-powder { color: var(--accent); }
-.batch-water { color: var(--water); }
 
 /* Collapsible tips */
 .tips { display: grid; gap: 4px; margin-top: 12px; }
@@ -234,8 +248,8 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
 .legend { margin: 0 0 12px; font-size: 13px; color: var(--ink-2); max-width: 90ch; }
 .legend strong, .legend em { color: var(--ink); }
 
-/* Printable plan: invisible on screen, the only thing on paper. */
-.print-plan { display: none; }
+/* Printouts: invisible on screen, the only thing on paper. */
+.print-plan, .print-label { display: none; }
 
 @media print {
   @page { size: A4; margin: 12mm 15mm; }
@@ -250,6 +264,7 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
   .pp-facts th { font-weight: 600; width: 22%; background: #eee; }
   .pp-facts td { font-size: 12pt; font-weight: 600; }
   .pp-facts td.pp-recipe { font-size: 9.5pt; font-weight: 400; }
+  .pp-source { display: block; margin-top: 2pt; font-size: 8.5pt; color: #444; }
   .pp-muted { font-weight: 400; font-size: 9.5pt; }
   .pp-note { font-size: 9pt; margin: 0 0 8pt; }
   .pp-intro { font-weight: 600; margin: 0 0 8pt; }
@@ -278,3 +293,49 @@ h1 { font: 650 44px/1.05 var(--serif); margin: 4px 0 8px; letter-spacing: -0.01e
 .card-collapsible > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
 .head-meta { margin: 0; }
 .reference .search { display: block; margin-bottom: 12px; }
+
+/* Glazy import */
+.glazy-bar { margin: -8px 0 20px; padding: 10px 14px; border: 1px dashed var(--line); border-radius: var(--radius); }
+.glazy-form { display: flex; gap: 8px 10px; flex-wrap: wrap; align-items: center; }
+.glazy-label { font-weight: 600; font-size: 14px; }
+.glazy-done { margin: 8px 0 0; font-size: 13px; color: var(--good); }
+.glazy-bar .note { margin-top: 8px; }
+.glazy-form input { flex: 1 1 220px; min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: inherit; font: 14px var(--sans); padding: 8px 10px; }
+.glazy-form input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.glazy-form button:disabled { opacity: 0.5; cursor: default; }
+.glazy-credit { margin: 0 0 12px; font-size: 12.5px; color: var(--ink-2); }
+.glazy-credit p { margin: 0; }
+.glazy-credit p + p { margin-top: 2px; }
+.glazy-credit a { color: var(--accent); }
+.row-unmatched .picker-box { border-color: var(--warn); border-style: dashed; }
+.row-unmatched .picker input::placeholder { color: var(--warn); }
+
+/* Clear all */
+.btn-quiet { border: 1px solid var(--line); background: none; color: var(--ink-2); font: 500 13px var(--sans); padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+.btn-quiet:hover { color: var(--ink); border-color: var(--ink-2); }
+.btn-danger { border: 0; background: var(--bad); color: var(--surface); font: 600 13px var(--sans); padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+.btn-danger:hover { filter: brightness(1.08); }
+.clear-confirm { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; font-weight: 600; }
+
+/* Bucket label: an A7 card (105 × 74 mm) on A4, cut out along the dashed line. */
+@media print {
+  .print-label { display: block; color: #000; font-family: var(--sans); }
+  .lb-card {
+    width: 105mm; height: 74mm; box-sizing: border-box; padding: 5mm 5.5mm; border: 0.6pt dashed #000;
+    display: grid; grid-template-columns: 1fr auto; grid-template-rows: 1fr auto; column-gap: 4mm; overflow: hidden;
+  }
+  .lb-main { min-width: 0; }
+  .lb-name { font: 650 17pt/1.1 var(--serif); margin: 0 0 1.5mm; }
+  .lb-recipe {
+    margin: 0 0 2mm; font-size: 7pt; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .lb-measured { margin: 0; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.06em; }
+  .lb-facts { display: flex; gap: 4mm; font-size: 10pt; margin: 0.5mm 0 1mm; }
+  .lb-facts strong { font-size: 15pt; }
+  .lb-holds { margin: 0; font-size: 9pt; }
+  .lb-holds strong { font-size: 10.5pt; }
+  .lb-qr { display: grid; justify-items: center; align-content: start; gap: 1mm; width: 24mm; font-size: 6.5pt; text-align: center; }
+  .lb-qr .qr { width: 24mm; height: 24mm; }
+  .lb-credit { grid-column: 1 / -1; margin: 1.5mm 0 0; font-size: 6pt; line-height: 1.3; color: #333; }
+  .lb-cut { margin: 3mm 0 0; font-size: 8pt; color: #555; }
+}
